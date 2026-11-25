@@ -20,8 +20,11 @@ def so2n_majorana_irrep_dim(n: int, k: int, chirality: str = "full") -> int:
     if chirality == "full":
         return full_dim
     if chirality in ("plus", "minus"):
-        if k != n or (n % 2 != 0):
-            raise ValueError(f"Real Hodge-chiral split requires even n and k == n; got n={n}, k={k}")
+        if k != n or (n % 2 != 0) or n < 4:
+            raise ValueError(
+                f"Universal Hodge-chiral equipartition requires even n >= 4 and k == n "
+                f"(so(4) = su(2)_+ + su(2)_- is not simple); got n={n}, k={k}"
+            )
         return full_dim // 2
     raise ValueError(f"Unknown chirality {chirality!r}")
 
@@ -38,8 +41,11 @@ def so2n_casimir_ad_norm_sq(n: int, k: int, gate_energy: Fraction, chirality: st
     if chirality == "full":
         return full_cas
     if chirality in ("plus", "minus"):
-        if k != n or (n % 2 != 0):
-            raise ValueError(f"Chiral split requires even n and k == n; got n={n}, k={k}")
+        if k != n or (n % 2 != 0) or n < 4:
+            raise ValueError(
+                f"Universal Hodge-chiral equipartition requires even n >= 4 and k == n "
+                f"(so(4) splits into commuting ideals); got n={n}, k={k}"
+            )
         return full_cas / 2
     raise ValueError(f"Unknown chirality {chirality!r}")
 

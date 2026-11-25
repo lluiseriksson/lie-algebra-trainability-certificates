@@ -35,7 +35,7 @@ def test_exact_algebra_identities_across_families() -> None:
             # Exact Theorem 3.2 simplified rational ratio: k*(2n-k) / (n*(2n-1)*C(2n, k))
             assert var == Fraction(k * (2 * n - k), n * (2 * n - 1) * math.comb(2 * n, k))
 
-        if n % 2 == 0:
+        if n % 2 == 0 and n >= 4:
             _, _, v_full = so2n_sector_variance_exact(n, n, Fraction(1, 1), Fraction(1, 1), Fraction(1, 1), "full")
             _, _, v_plus = so2n_sector_variance_exact(n, n, Fraction(1, 1), Fraction(1, 1), Fraction(1, 1), "plus")
             _, _, v_minus = so2n_sector_variance_exact(n, n, Fraction(1, 1), Fraction(1, 1), Fraction(1, 1), "minus")
@@ -260,8 +260,30 @@ def test_48_live_adversarial_red_team_attacks_rejected() -> None:
     }))
     # 48 (H28): Control character / newline injected in cert_id
     add("48_cert_id_embedded_newline", lambda c: c.__setitem__("cert_id", "bad\nid"))
+    # 49 (v2): Non-simple SO(4) (n=2) Hodge-chiral equipartition forbidden (commuting ideals su(2)_+ + su(2)_-)
+    attacks.append(("49_so4_n2_hodge_chiral_rejected", {
+        "schema_version": "LIE-TRAIN-CERT-1.0",
+        "cert_id": "forged_so4_n2_chiral",
+        "family": "so2n_majorana",
+        "n_qubits": 2,
+        "dla_dimension": 6,
+        "threshold_tau": "1/10",
+        "verdict": "CERTIFIED_TRAINABLE",
+        "exact_variance": "2/9",
+        "sectors": [{
+            "k_degree": 2,
+            "chirality": "plus",
+            "irrep_dim": 3,
+            "gate_energy": "1",
+            "casimir_ad_norm_sq": "2",
+            "rho_proj_norm_sq": "1/2",
+            "M_proj_norm_sq": "2",
+            "sector_variance": "2/9",
+        }],
+        "physical_checks": {"total_rho_proj_norm_sq": "1/2", "rho_purity_bound_ok": 1, "all_sectors_distinct": 1},
+    }))
 
-    assert len(attacks) == 48
+    assert len(attacks) == 49
     for name, cand in attacks:
         with pytest.raises(ValueError, match="."):
             verify_lie_trainability_certificate_exact(cand)
