@@ -1,0 +1,37 @@
+{
+  "schema_version": "LIE-TRAIN-CERT-1.0",
+  "cert_id": "so2n_n20_kn_barren_in_poly_dla",
+  "family": "so2n_majorana",
+  "n_qubits": 20,
+  "dla_dimension": 780,
+  "threshold_tau": "1/10000",
+  "verdict": "CERTIFIED_BARREN_PLATEAU",
+  "exact_variance": "1292/1879725393",
+  "sectors": [
+    {
+      "k_degree": 20,
+      "chirality": "plus",
+      "irrep_dim": 68923264410,
+      "gate_energy": "1",
+      "casimir_ad_norm_sq": "35345263800",
+      "rho_proj_norm_sq": "46189/262144",
+      "M_proj_norm_sq": "524288",
+      "sector_variance": "1292/1879725393"
+    },
+    {
+      "k_degree": 20,
+      "chirality": "minus",
+      "irrep_dim": 68923264410,
+      "gate_energy": "1",
+      "casimir_ad_norm_sq": "35345263800",
+      "rho_proj_norm_sq": "0",
+      "M_proj_norm_sq": "524288",
+      "sector_variance": "0"
+    }
+  ],
+  "physical_checks": {
+    "total_rho_proj_norm_sq": "46189/262144",
+    "rho_purity_bound_ok": 1,
+    "all_sectors_distinct": 1
+  }
+}

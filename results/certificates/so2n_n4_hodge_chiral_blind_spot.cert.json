@@ -1,0 +1,37 @@
+{
+  "schema_version": "LIE-TRAIN-CERT-1.0",
+  "cert_id": "so2n_n4_hodge_chiral_blind_spot",
+  "family": "so2n_majorana",
+  "n_qubits": 4,
+  "dla_dimension": 28,
+  "threshold_tau": "1/1000",
+  "verdict": "CERTIFIED_BLIND_SPOT",
+  "exact_variance": "0",
+  "sectors": [
+    {
+      "k_degree": 4,
+      "chirality": "plus",
+      "irrep_dim": 35,
+      "gate_energy": "1",
+      "casimir_ad_norm_sq": "20",
+      "rho_proj_norm_sq": "3/8",
+      "M_proj_norm_sq": "0",
+      "sector_variance": "0"
+    },
+    {
+      "k_degree": 4,
+      "chirality": "minus",
+      "irrep_dim": 35,
+      "gate_energy": "1",
+      "casimir_ad_norm_sq": "20",
+      "rho_proj_norm_sq": "0",
+      "M_proj_norm_sq": "16",
+      "sector_variance": "0"
+    }
+  ],
+  "physical_checks": {
+    "total_rho_proj_norm_sq": "3/8",
+    "rho_purity_bound_ok": 1,
+    "all_sectors_distinct": 1
+  }
+}

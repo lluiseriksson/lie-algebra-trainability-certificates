@@ -1,0 +1,380 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage[hidelinks,
+  pdftitle={Exact-Q Adjoint-Irrep Variance Laws, Majorana Hodge-Chiral Selection Rules, and Machine-Checked Trainability Certificates for Compact Lie-Group Quantum Circuits},
+  pdfauthor={Lluis Eriksson}
+]{hyperref}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Ad}{\operatorname{Ad}}
+\newcommand{\ad}{\operatorname{ad}}
+\newcommand{\HS}{\mathrm{HS}}
+\newcommand{\Herm}{\operatorname{Herm}}
+\newcommand{\so}{\mathfrak{so}}
+\newcommand{\su}{\mathfrak{su}}
+\newcommand{\lieg}{\mathfrak{g}}
+\newcommand{\certschema}{\texttt{LIE-TRAIN-CERT-1.0}}
+\emergencystretch=1.5em
+
+\title{\bfseries Exact-$\QQ$ Adjoint-Irrep Variance Laws, Majorana Hodge-Chiral Selection Rules, and Machine-Checked Trainability Certificates for Compact Lie-Group Quantum Circuits}
+
+\author{Lluis Eriksson\thanks{Independent researcher (Sweden). Prepared with AI assistance (Google Antigravity). Code, zero-dependency Lean~4 formalization, and exact-$\QQ$ certificates (MIT license):\\ \url{https://github.com/lluiseriksson/lie-algebra-trainability-certificates}.}}
+
+\date{November 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+A foundational question in variational quantum computation is characterizing when symmetry-structured circuits avoid exponentially vanishing gradients (barren plateaus). Recent work by Xie, Szpankowski, and Grama (\texttt{arXiv:2611.18378}, 2026) and Ragone et al.\ (\emph{Nature Communications} \textbf{15}, 7172, 2024) established Lie-algebraic variance formulas and sufficient trainability criteria in terms of dynamical Lie algebra (DLA) projections. Here we tighten these criteria into an exact, closed-form rational identity over $\QQ$ for any compact Lie-group $2$-design circuit on any multiplicity-free $\Ad_G$-invariant subspace $\mathcal{W} = \bigoplus_\lambda V_\lambda \subseteq \Herm(2^n)$ containing the non-commutant component of $M$ or $\rho$---including observables $M \notin i\lieg$ outside the DLA---and deploy it to uncover three sharp structural phenomena together with a machine-checked, zero-floating-point-trust certification protocol. First, for fermionic matchgate circuits ($G = \mathrm{Spin}(2n) \twoheadrightarrow SO(2n)$, $\dim\so(2n) = n(2n-1)$), we prove the exact Casimir--binomial law $\|\ad_H|_{\Lambda^k}\|_{\HS}^2 = 2 E_H \binom{2n-2}{k-1}$, establishing $\Theta(n^{-2})$ trainability at Majorana degree $k=2$ ($Z_1 \in i\so(2n)$), $\Theta(n^{-3})$ trainability at $k=4$ ($Z_1 Z_2 \notin i\so(2n)$, trainable \emph{outside} $i\so(2n)$), and a provable $\Theta(2^{-n})$ exponential barren plateau at $k=n$ ($Z_1\cdots Z_{n/2}$, $6.49\times 10^{-13}$ at $n=40$ and $6.33\times 10^{-16}$ at $n=50$) within a circuit whose DLA $\so(2n)$ is strictly quadratic-dimensional. Second, we characterize both the complementary-degree fermion-parity isomorphism $\Lambda^k \cong \Lambda^{2n-k}$ ($k < n$) and, for even $n$, the real Hodge-star splitting $\Lambda^n(\RR^{2n}) = \Lambda^n_+ \oplus \Lambda^n_-$ induced by $P_{\mathrm{ferm}} = Z_1\cdots Z_n$, yielding an exact chiral selection law on $|0\rangle^{\otimes n}$: the self-dual observable $M_+ = (Z_1\cdots Z_{n/2} + Z_{n/2+1}\cdots Z_n)/\sqrt{2}$ achieves an exact $2\times$ variance amplification, whereas the anti-self-dual partner $M_-$ suffers an exact zero-variance chiral blind spot. Third, for $U(1)$ Hamming-weight-conserving circuits ($G = \prod_w SU(\binom{n}{w})$), we prove an exact filling-fraction transition separating $\Theta(n^{-3})$ ($w=1$) and $\Theta(n^{-4})$ ($w=2$) trainability from $\Theta(\sqrt{n}\,2^{-n})$ half-filling barren plateaus, alongside a gate-commutant blind-spot theorem whenever $H$ acts as a scalar on active blocks. All $18$ algebraic, binomial, chiral, Cauchy--Schwarz, mutual-exclusivity, and sample-complexity theorems are machine-checked in zero-dependency Lean~4 (\texttt{v4.35.0}, $0$~\texttt{sorry}, $0$~\texttt{Classical.choice}, $0$~warnings), cross-checked against $12{,}000$-sample Haar Monte Carlo across nine configurations ($\max z = 1.24$), and operationalized in a pure-stdlib exact-$\QQ$ verifier (\certschema{}) that certifies all $12$ benchmark circuits up to $n=100$ qubits in $< 1$\,ms with zero quantum shots (versus $9.49\times 10^{24}$ finite-shot Chebyshev evaluations at $n=40$) while rejecting $48/48$ live adversarial attacks.
+\end{abstract}
+
+\section{Introduction}
+
+Variational quantum algorithms minimize an expectation value $C(\theta) = \Tr(U(\theta)\rho U(\theta)^\dagger M)$ over parameterized unitaries $U(\theta) = \prod_\ell e^{-i\theta_\ell H_\ell}$ generated by a finite set of Hermitian operators $\mathcal{G} = \{H_\ell\}$. Since McClean et al.~\cite{mcclean2018barren} proved that unstructured $2$-design circuits suffer exponentially vanishing gradient variance $\Var(\partial_\theta C) = \Theta(2^{-n})$ (a \emph{barren plateau}), a central program in quantum information theory has sought to classify exactly which circuit symmetries, initial states $\rho$, and observables $M$ restore polynomial trainability~\cite{cerezo2021cost,larocca2022diagnosing,diaz2023showcasing,wiersema2024classification}.
+
+Two landmark lines of work frame the current frontier. Ragone et al.~\cite{ragone2024lie} and Fontana et al.~\cite{fontana2024characterizing} developed a Lie-algebraic theory expressing the gradient variance of deep circuits forming a $2$-design over the dynamical Lie group $G = \langle e^{\lieg}\rangle$ in terms of the $\lieg$-purity $\mathcal{P}_{\lieg}(\rho)$ whenever $M \in i\lieg$ (or $\rho \in i\lieg$). Very recently, Xie, Szpankowski, and Grama~\cite{xie2026structure} (\texttt{arXiv:2611.18378}, November 2026) advanced this theory by proving that structural symmetry constrains circuit dynamics to compact Lie subgroups $G \subset SU(2^n)$ and deriving a sufficient trainability condition in terms of polynomial-dimensional invariant subspaces.
+
+Three fundamental questions, however, remain open after~\cite{ragone2024lie,fontana2024characterizing,xie2026structure}:
+\begin{enumerate}[leftmargin=1.8em,itemsep=2pt]
+  \item \textbf{Exactness beyond $i\lieg$ and converse barriers:} When $M \notin i\lieg$ (such as multi-body Pauli observables under matchgate circuits, or multi-sector observables), can the gradient variance be expressed as an \emph{exact rational identity} over $\QQ$ rather than a lower bound? Conversely, does a polynomial-dimensional DLA $\dim(\lieg) = O(\mathrm{poly}(n))$ preclude exponential barren plateaus, or can exponential concentration occur \emph{inside} a polynomial-DLA circuit?
+  \item \textbf{Fine-grained real-irrep and commutant blind spots:} When an exterior-power or symmetry sector splits into inequivalent real irreducible representations---specifically the even-$n$ Hodge-star decomposition $\Lambda^n(\RR^{2n}) = \Lambda^n_+ \oplus \Lambda^n_-$ for $SO(2n)$---or when the differentiated gate $H$ lies in the commutant of an active symmetry block, how do exact selection rules amplify or completely annihilate gradients?
+  \item \textbf{Zero-shot, machine-checked certification:} Empirically distinguishing a trainable variance $\tau$ from an exponential barren plateau or zero-variance blind spot requires $\Omega(\tau^{-2})$ circuit shots, which reaches $>10^{24}$ shots at $n=40$. Can trainability, barren-plateau, and blind-spot verdicts be certified \emph{before} running quantum hardware via an independently verifiable, zero-floating-point-trust exact-$\QQ$ proof artifact backed by a machine-checked theorem prover?
+\end{enumerate}
+
+\paragraph{Summary of Contributions.}
+We resolve all three questions completely:
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item \textbf{Exact Rational Adjoint-Irrep Casimir--Weingarten Identity (Theorem~\ref{thm:adjoint-irrep}):} For independent $G$-$2$-designs $U_L, U_R$ flanking a gate $e^{-i\theta H}$ ($H \in i\lieg$) and any multiplicity-free $\Ad_G$-invariant subspace $\mathcal{W} = \bigoplus_\lambda V_\lambda \subseteq \mathcal{C}_G^\perp$ containing the non-commutant component of $M$ (or $\rho$), we prove the exact identity
+  \begin{equation}\label{eq:master-intro}
+    \Var_{G \times G}(\partial_\theta C)
+    = \sum_{\lambda} \frac{\|\ad_H|_{V_\lambda}\|_{\HS}^2}{\dim(V_\lambda)^2}\,
+      \|\Pi_{V_\lambda}(\rho)\|_{\HS}^2\, \|\Pi_{V_\lambda}(M)\|_{\HS}^2,
+  \end{equation}
+  valid for observables $M \notin i\lieg$ outside the DLA and immediately yielding exact $\QQ$-valued variances whenever the Casimir and projection norms are rational.
+  \item \textbf{Matchgate $SO(2n)$ Majorana-Degree Phase Transition and Even-$n$ Hodge-Chiral Selection Law (Theorem~\ref{thm:so2n}):} Using the exact Casimir--binomial law $\|\ad_H|_{\Lambda^k}\|_{\HS}^2 = 2 E_H \binom{2n-2}{k-1}$, we prove that on the physical Fock state $|0\rangle^{\otimes n}$ with Pauli-$Z$ strings $M = Z_1\cdots Z_m \in \Lambda^{2m}$, the $2^n$ factors cancel identically, producing $\Theta(n^{-2})$ trainability at $k=2$ ($Z_1 \in i\so(2n)$), $\Theta(n^{-3})$ trainability at $k=4$ ($Z_1 Z_2 \notin i\so(2n)$), and a provable $\Theta(2^{-n})$ exponential barren plateau at $k=n$ ($Z_1\cdots Z_{n/2}$) within a circuit whose DLA $\dim\so(2n) = n(2n-1)$ is strictly quadratic. We further characterize the $SO(2n)$ fermion-parity isomorphism $\Lambda^k \cong \Lambda^{2n-k}$ ($k<n$) and, for even $n$, the Hodge-star split $\Lambda^n = \Lambda^n_+ \oplus \Lambda^n_-$, proving exact $2\times$ amplification for $M_+ = (Z_1\cdots Z_{n/2} + Z_{n/2+1}\cdots Z_n)/\sqrt{2}$ and an exact $0$-variance chiral blind spot for $M_- = (Z_1\cdots Z_{n/2} - Z_{n/2+1}\cdots Z_n)/\sqrt{2}$.
+  \item \textbf{$U(1)$ Hamming-Weight Filling-Fraction Transition and Gate-Commutant Blind-Spot Theorem (Theorem~\ref{thm:u1}):} For particle-conserving circuits $G = \prod_{w=0}^n SU(\binom{n}{w})$, we establish the exact block variance law separating $\Theta(n^{-3})$ ($w=1$) and $\Theta(n^{-4})$ ($w=2$) trainability from $\Theta(\sqrt{n}\,2^{-n})$ half-filling barren plateaus, and prove exact zero variance whenever $H$ acts as a scalar on active blocks (e.g.\ $H = \sum_{j=1}^n Z_j$).
+  \item \textbf{Zero-Dependency Lean~4 Kernel and Exact-$\QQ$ Certificate Verifier (Theorem~\ref{thm:cert}):} All $18$ algebraic, combinatorial, chiral, discrete Cauchy--Schwarz, verdict-exclusivity, and Chebyshev sample-complexity theorems are formally verified in Lean~4 (\texttt{v4.35.0}) with $0$ external dependencies, $0$~\texttt{sorry}, $0$~\texttt{Classical.choice}, and $0$~warnings. Our pure-stdlib verifier \certschema{} independently checks $12$ certificates up to $n=100$ qubits in $< 1$\,ms (zero floats, zero shots), matches $12{,}000$-sample Haar Monte Carlo across all $9$ benchmarks ($\max z = 1.24$), and rejects $48/48$ live adversarial attacks.
+\end{itemize}
+
+\section{Preliminaries and Setup}
+
+Let $\mathcal{H} = (\CC^2)^{\otimes n}$ be the $n$-qubit Hilbert space of dimension $D = 2^n$, and let $\Herm(D)$ denote the $D^2$-dimensional real Euclidean vector space of $D \times D$ Hermitian matrices equipped with the Hilbert--Schmidt inner product $\langle A, B\rangle_{\HS} = \Tr(AB)$ and norm $\|A\|_{\HS}^2 = \Tr(A^2)$.
+
+Consider a parameterized quantum circuit $U(\boldsymbol{\theta}) = U_R e^{-i\theta H} U_L$ with a distinguished gate generator $H \in i\lieg \subset \Herm(D)$, where $\lieg \subseteq \su(D)$ is the dynamical Lie algebra generated by the circuit's gate pool and $G = \langle e^{\lieg}\rangle \subseteq SU(D)$ is the corresponding compact connected Lie group~\cite{ragone2024lie,xie2026structure}. For an input density matrix $\rho \succeq 0$ ($\Tr\rho = 1$, $\Tr\rho^2 \le 1$) and Hermitian observable $M \in \Herm(D)$, the cost function and its partial derivative with respect to $\theta$ are
+\begin{equation}
+  C(\theta) = \Tr\!\bigl(U_R e^{-i\theta H} U_L \rho U_L^\dagger e^{i\theta H} U_R^\dagger M\bigr), \qquad
+  \partial_\theta C\big|_{\theta=0} = \Tr\!\bigl(\rho_L \cdot i[H, M_R]\bigr) = \langle \rho_L, \ad_H(M_R)\rangle_{\HS},
+\end{equation}
+where $\rho_L := U_L \rho U_L^\dagger = \Ad_{U_L}(\rho)$, $M_R := U_R^\dagger M U_R = \Ad_{U_R^{-1}}(M)$, and $\ad_H : \Herm(D) \to \Herm(D)$ is the real skew-symmetric linear operator
+\begin{equation}
+  \ad_H(X) := i[H, X], \qquad \langle X, \ad_H(Y)\rangle_{\HS} = -\langle \ad_H(X), Y\rangle_{\HS}.
+\end{equation}
+
+We work in the standard $G$-$2$-design regime~\cite{ragone2024lie,fontana2024characterizing,xie2026structure}: the subcircuits $U_L$ and $U_R$ are drawn independently from $2$-designs over the Haar measure $\mu_G$ on $G$. Because $\int_G \Ad_U(X)\,d\mu_G(U)$ projects onto the commutant $\mathcal{C}_G = \{Y \in \Herm(D) : \Ad_U(Y) = Y\ \forall U \in G\}$ and $\ad_H(\mathcal{C}_G) = 0$ for every $H \in i\lieg$, the mean gradient vanishes identically: $\mathbb{E}_{G\times G}[\partial_\theta C] = 0$, so $\Var_{G\times G}(\partial_\theta C) = \mathbb{E}_{G\times G}[(\partial_\theta C)^2]$.
+
+\section{Main Theorems}
+
+\subsection{Exact Rational Adjoint-Irrep Casimir--Weingarten Identity}
+
+\begin{theorem}[Exact Adjoint-Irrep Variance Law over $\QQ$]\label{thm:adjoint-irrep}
+Let $G \subseteq SU(2^n)$ be a compact connected Lie group with Lie algebra $\lieg$, commutant $\mathcal{C}_G = \{Y \in \Herm(2^n) : \Ad_U(Y) = Y\ \forall U \in G\}$, and generator $H \in i\lieg$. Let $\mathcal{W} = \bigoplus_{\lambda} V_\lambda \subseteq \mathcal{C}_G^\perp \subset \Herm(2^n)$ be an $\Ad_G$-invariant subspace decomposing into pairwise non-isomorphic real irreducible representations $V_\lambda$, with orthogonal projections $\Pi_{V_\lambda}$. If $U_L, U_R$ are independent $G$-$2$-designs and either $\Pi_{\mathcal{C}_G^\perp}(M) \in \mathcal{W}$ or $\Pi_{\mathcal{C}_G^\perp}(\rho) \in \mathcal{W}$ (including observables $M \notin i\lieg$), then
+\begin{equation}\label{eq:thm31}
+  \Var_{G \times G}(\partial_\theta C)
+  = \sum_{\lambda} \frac{\|\ad_H|_{V_\lambda}\|_{\HS}^2}{\dim(V_\lambda)^2}\,
+    \|\Pi_{V_\lambda}(\rho)\|_{\HS}^2\, \|\Pi_{V_\lambda}(M)\|_{\HS}^2,
+\end{equation}
+where $\|\ad_H|_{V_\lambda}\|_{\HS}^2 = \sum_{a=1}^{\dim V_\lambda} \|\ad_H(E_{\lambda,a})\|_{\HS}^2$ for any $\langle\cdot,\cdot\rangle_{\HS}$-orthonormal basis $\{E_{\lambda,a}\}$ of $V_\lambda$. In particular, every term is nonnegative, $\Var_{G\times G}(\partial_\theta C) \ge \frac{\|\ad_H|_{V_\lambda}\|_{\HS}^2}{\dim(V_\lambda)^2} \|\Pi_{V_\lambda}(\rho)\|_{\HS}^2 \|\Pi_{V_\lambda}(M)\|_{\HS}^2$ for each $\lambda$, and $\Var_{G\times G}(\partial_\theta C) \in \QQ$ whenever each Casimir norm squared and projection norm squared is rational.
+\end{theorem}
+
+\begin{proof}
+Since $H \in i\lieg$, $\ad_H$ annihilates $\mathcal{C}_G$ and leaves every $\Ad_G$-invariant subspace $V_\lambda \subseteq \mathcal{W}$ invariant. Because $\Ad_{U_L}$ and $\Ad_{U_R^{-1}}$ preserve $\mathcal{W}$, $\mathcal{C}_G$, and their orthogonal complements, the hypothesis $\Pi_{\mathcal{C}_G^\perp}(M) \in \mathcal{W}$ (or $\Pi_{\mathcal{C}_G^\perp}(\rho) \in \mathcal{W}$) restricts $\partial_\theta C = \langle \Ad_{U_L}(\rho), \ad_H(\Ad_{U_R^{-1}}(M))\rangle_{\HS}$ identically to $\mathcal{W} = \bigoplus_\lambda V_\lambda$:
+\[
+  \partial_\theta C = \sum_{\lambda} \langle \Ad_{U_L}(\Pi_{V_\lambda}(\rho)),\, \ad_H(\Ad_{U_R^{-1}}(\Pi_{V_\lambda}(M)))\rangle_{\HS}.
+\]
+Consider the real second-moment operator on $\mathcal{W}$,
+\[
+  T_\rho(X) := \int_G \Ad_U(\Pi_{\mathcal{W}}(\rho))\,\langle \Ad_U(\Pi_{\mathcal{W}}(\rho)), X\rangle_{\HS}\,d\mu_G(U).
+\]
+By right-invariance of $\mu_G$, $T_\rho$ is a symmetric $\Ad_G$-equivariant endomorphism of $\mathcal{W}$. Since the real irreps $V_\lambda \subseteq \mathcal{W}$ are pairwise non-isomorphic, Schur's lemma for real orthogonal representations (applied to the symmetric operator $T_\rho$, whose real eigenspaces are $\Ad_G$-invariant) forces $T_\rho$ to be block-diagonal across $\{V_\lambda\}$ and equal to a real scalar $c_\lambda I_{V_\lambda}$ on each $V_\lambda$. Taking the trace on $V_\lambda$ yields
+\[
+  c_\lambda \dim(V_\lambda) = \Tr_{V_\lambda}(T_\rho) = \int_G \|\Ad_U(\Pi_{V_\lambda}(\rho))\|_{\HS}^2\,d\mu_G(U) = \|\Pi_{V_\lambda}(\rho)\|_{\HS}^2,
+\]
+so $c_\lambda = \|\Pi_{V_\lambda}(\rho)\|_{\HS}^2 / \dim(V_\lambda)$. Applying the same identity to $U_R^{-1}$ acting on $\Pi_{\mathcal{W}}(M)$ gives
+\begin{align*}
+  \Var_{G\times G}(\partial_\theta C)
+  &= \sum_{\lambda} \frac{\|\Pi_{V_\lambda}(\rho)\|_{\HS}^2}{\dim(V_\lambda)}
+     \int_G \|\ad_H(\Ad_{U_R^{-1}}(\Pi_{V_\lambda}(M)))\|_{\HS}^2\,d\mu_G(U_R) \\
+  &= \sum_{\lambda} \frac{\|\Pi_{V_\lambda}(\rho)\|_{\HS}^2}{\dim(V_\lambda)}
+     \Tr_{V_\lambda}\!\bigl((\ad_H|_{V_\lambda})^\top (\ad_H|_{V_\lambda})\, T_{M}\big|_{V_\lambda}\bigr) \\
+  &= \sum_{\lambda} \frac{\|\Pi_{V_\lambda}(\rho)\|_{\HS}^2}{\dim(V_\lambda)}\,
+     \frac{\|\Pi_{V_\lambda}(M)\|_{\HS}^2}{\dim(V_\lambda)}\,
+     \|\ad_H|_{V_\lambda}\|_{\HS}^2,
+\end{align*}
+which is~\eqref{eq:thm31}. Both nonnegativity of the sum and the single-irrep lower bound $v_\lambda \le \sum_\mu v_\mu$ are formalized in Lean~4 (Theorem~14, \texttt{irrep\_variance\_sum\_nonneg}).
+\end{proof}
+
+\begin{remark}[Relationship to~\cite{ragone2024lie,xie2026structure}]
+When $M \in i\lieg$ and $\lieg$ is simple (e.g.\ $\su(D)$ or $\so(2n)$ acting on $\Lambda^2$), \eqref{eq:thm31} specializes immediately to the $\lieg$-purity theorem of Ragone et al.~\cite{ragone2024lie}. Crucially, Theorem~\ref{thm:adjoint-irrep} extends exactness to \emph{all} higher-order representations $V_\lambda \not\subset i\lieg$ (such as $\Lambda^k$ for $k \ge 3$ under matchgates) and replaces the sufficient single-subspace lower bound of Xie--Szpankowski--Grama~\cite{xie2026structure} with an exact, tight rational sum over all sectors.
+\end{remark}
+
+\subsection{Matchgate \texorpdfstring{$SO(2n)$}{SO(2n)} Majorana-Degree Phase Transition and Even-\texorpdfstring{$n$}{n} Hodge-Chiral Selection Law}
+
+Free-fermion / matchgate circuits~\cite{valiant2002quantum,terhal2002classical} are generated by quadratic Majorana operators $H_{ab} = \frac{i}{2}\gamma_a\gamma_b$ ($1 \le a < b \le 2n$), where the $2n$ Hermitian Jordan--Wigner Majorana operators satisfy $\{\gamma_a, \gamma_b\} = 2\delta_{ab} I$. Their dynamical Lie algebra is $\lieg = \so(2n)$ of quadratic dimension $\dim\so(2n) = n(2n-1)$, and $\Ad_{\mathrm{Spin}(2n)}$ acts on $\Herm(2^n)$ via the exterior powers $\bigoplus_{k=0}^{2n} \Lambda^k(\RR^{2n})$, where $\Lambda^k$ is spanned by the $\binom{2n}{k}$ degree-$k$ Hermitian Majorana monomials $B_S = (-i)^{k(k-1)/2}\gamma_{s_1}\cdots\gamma_{s_k}$ ($S = \{s_1 < \dots < s_k\} \subseteq \{1,\dots,2n\}$), which satisfy $\langle B_S, B_T\rangle_{\HS} = 2^n \delta_{S,T}$.
+
+Every $\Lambda^k$ ($1 \le k \le 2n-1$, $k \ne n$) is a real irreducible $SO(2n)$-representation of dimension $\binom{2n}{k}$. Crucially, however, the fermion parity operator $P_{\mathrm{ferm}} = (-i)^n \gamma_1\cdots\gamma_{2n} = Z_1\cdots Z_n$ satisfies $P_{\mathrm{ferm}}^2 = I$ and commutes with all of $\mathrm{Spin}(2n)$, yielding two subtle $SO(2n)$ representation-theoretic effects absent under $O(2n)$:
+\begin{enumerate}[leftmargin=1.8em,itemsep=2pt]
+  \item \textbf{Complementary-degree isomorphism ($k \ne n$):} Left multiplication by $P_{\mathrm{ferm}}$ (for even $k$) or $i P_{\mathrm{ferm}}$ (for odd $k$) defines an $SO(2n)$-equivariant isomorphism $\Lambda^k \xrightarrow{\sim} \Lambda^{2n-k}$. Hence a multi-degree subspace $\mathcal{W}_S = \bigoplus_{k \in S} \Lambda^k$ is multiplicity-free (as required by Theorem~\ref{thm:adjoint-irrep}) if and only if $S$ contains \emph{at most one} element from each complementary pair $\{k, 2n-k\}$. Combining complementary degrees (such as $M_\pm = (Z_1 \pm Z_2 Z_3)/\sqrt{2} \in \Lambda^2 \oplus \Lambda^4$ at $n=3$) decomposes instead into $P_{\mathrm{ferm}} = \pm 1$ eigenspaces with $2\times$ amplification or exact $0$-variance cancellation.
+  \item \textbf{Even-$n$ Hodge-star splitting ($k = n$):} When $n$ is \emph{even}, $P_{\mathrm{ferm}}$ acts within $\Lambda^n(\RR^{2n})$ and splits it into two \emph{inequivalent} real irreducible $SO(2n)$-representations:
+\end{enumerate}
+\begin{equation}\label{eq:hodge-split}
+  \Lambda^n(\RR^{2n}) = \Lambda^n_+ \oplus \Lambda^n_-, \qquad
+  \Lambda^n_\pm := \{X \in \Lambda^n : P_{\mathrm{ferm}} X = \pm X\}, \qquad
+  \dim(\Lambda^n_\pm) = \frac{1}{2}\binom{2n}{n},
+\end{equation}
+because $\det(R) = +1$ preserves the Hodge star $\star$, whereas improper reflections in $O(2n)\setminus SO(2n)$ swap $\Lambda^n_+ \leftrightarrow \Lambda^n_-$.
+
+\begin{theorem}[Matchgate $SO(2n)$ Phase Transition and Even-$n$ Hodge-Chiral Selection Law]\label{thm:so2n}
+Let $G = \mathrm{Spin}(2n) \twoheadrightarrow SO(2n)$ and $H = \sum_{1 \le a < b \le 2n} h_{ab}\frac{i}{2}\gamma_a\gamma_b \in i\so(2n)$ with gate energy $E_H := \sum_{a<b} h_{ab}^2 > 0$.
+\begin{enumerate}[leftmargin=1.8em,itemsep=3pt]
+  \item \textbf{Exact Casimir--Binomial Law:} For every Majorana degree $1 \le k \le 2n-1$,
+  \begin{equation}\label{eq:so2n-casimir}
+    \|\ad_H|_{\Lambda^k}\|_{\HS}^2 = 2 E_H \binom{2n-2}{k-1},
+    \qquad
+    \frac{\|\ad_H|_{\Lambda^k}\|_{\HS}^2}{\dim(\Lambda^k)^2}
+    = \frac{E_H\, k(2n-k)}{n(2n-1)\binom{2n}{k}}.
+  \end{equation}
+  For even $n$ and $k=n$, each chiral irrep $\Lambda^n_\pm$ satisfies $\dim(\Lambda^n_\pm) = \frac{1}{2}\binom{2n}{n}$ and $\|\ad_H|_{\Lambda^n_\pm}\|_{\HS}^2 = E_H \binom{2n-2}{n-1}$, doubling the exact variance prefactor to $\frac{E_H \binom{2n-2}{n-1}}{(\frac{1}{2}\binom{2n}{n})^2} = \frac{4 E_H \binom{2n-2}{n-1}}{\binom{2n}{n}^2} = \frac{2 E_H n}{(2n-1)\binom{2n}{n}}$.
+  \item \textbf{Poly-vs-Exp Transition Within a Quadratic DLA:} On the physical Fock state $\rho = |0\rangle\langle 0|^{\otimes n}$ ($\|\Pi_{\Lambda^{2m}}(\rho)\|_{\HS}^2 = \binom{n}{m}/2^n$) with any single $m$-body Pauli-$Z$ string $M = Z_{i_1}\cdots Z_{i_m} \in \Lambda^{2m}$ ($\|M\|_{\HS}^2 = 2^n$), the $2^n$ factors cancel identically:
+  \begin{equation}\label{eq:so2n-fock}
+    \Var_{SO(2n)}(\partial_\theta \langle Z_{i_1}\cdots Z_{i_m}\rangle)
+    = \frac{2 E_H \binom{2n-2}{2m-1}\binom{n}{m}}{\binom{2n}{2m}^2}
+    = \frac{2m(2n-2m)\,E_H\,\binom{n}{m}}{n(2n-1)\binom{2n}{2m}}.
+  \end{equation}
+  In particular (for $E_H = 1$):
+  \begin{itemize}[leftmargin=1.4em,itemsep=1pt]
+    \item $k=2$ ($Z_1 \in i\so(2n)$): $\Var = \frac{4(n-1)}{n(2n-1)^2} = \Theta(n^{-2})$ (\emph{trainable, $M \in i\so(2n)$});
+    \item $k=4$ ($Z_1 Z_2 \notin i\so(2n)$): $\Var = \frac{24(n-2)}{n(2n-1)^2(2n-3)} = \Theta(n^{-3})$ (\emph{trainable outside $i\so(2n)$});
+    \item $k=n$ ($n=2m$, $Z_1\cdots Z_m$): $\Var = \frac{n\binom{n}{n/2}}{(2n-1)\binom{2n}{n}} = \Theta(2^{-n})$ (\emph{exponential barren plateau within a circuit whose DLA $\dim\so(2n)=n(2n-1)$ is quadratic}), with exact separation ratio $\Var(k=2)/\Var(k=n) \ge \frac{4(n-1)\,2^n}{n^2(2n-1)(2n+1)}$.
+  \end{itemize}
+  \item \textbf{Even-$n$ Hodge-Chiral Selection Rule ($2\times$ / $0\times$):} For even $n=2m$, $|0\rangle^{\otimes n}$ satisfies $P_{\mathrm{ferm}}|0\rangle^{\otimes n} = +|0\rangle^{\otimes n}$, so $\Pi_{\Lambda^n}(|0\rangle\langle 0|^{\otimes n}) \in \Lambda^n_+$ lies $100\%$ in the self-dual irrep. Consequently, for the normalized self-dual and anti-self-dual observables $M_\pm = \frac{1}{\sqrt{2}}(Z_1\cdots Z_m \pm Z_{m+1}\cdots Z_n) \in \Lambda^n_\pm$ (both having $\|M_\pm\|_{\HS}^2 = 2^n$),
+  \begin{equation}\label{eq:hodge-selection}
+    \Var_{SO(2n)}(\partial_\theta \langle M_+\rangle) = 2\,\Var_{SO(2n)}(\partial_\theta \langle Z_1\cdots Z_m\rangle), \qquad
+    \Var_{SO(2n)}(\partial_\theta \langle M_-\rangle) = 0,
+  \end{equation}
+  whereas the unbalanced half-string $M = Z_1\cdots Z_m = (M_+ + M_-)/\sqrt{2}$ splits $50/50$ across $\Lambda^n_\pm$ ($\|\Pi_{\Lambda^n_\pm}(M)\|_{\HS}^2 = 2^{n-1}$ each), so the $2\times$ prefactor cancels the $1/2$ projection weight and recovers~\eqref{eq:so2n-fock} identically.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+For a single basis generator $H_{ab} = \frac{i}{2}\gamma_a\gamma_b$ ($a<b$) and a Majorana monomial $B_S$ ($|S|=k$), anticommutation $\{\gamma_i,\gamma_j\} = 2\delta_{ij}I$ implies $i[H_{ab}, B_S] = 0$ if $\{a,b\}\subseteq S$ or $\{a,b\}\cap S = \emptyset$, and $\|i[H_{ab}, B_S]\|_{\HS}^2 = \|B_{S \triangle \{a,b\}}\|_{\HS}^2 = \|B_S\|_{\HS}^2$ if $|S \cap \{a,b\}| = 1$. In the orthonormal basis $\{2^{-n/2} B_S\}$, there are exactly $2\binom{2n-2}{k-1}$ subsets $S$ of size $k$ containing exactly one of $\{a,b\}$, so $\|\ad_{H_{ab}}|_{\Lambda^k}\|_{\HS}^2 = 2\binom{2n-2}{k-1}$. Because the distinct generators $H_{ab}$ form an orthogonal basis of $\so(2n)$ and $SO(2n)$-invariance forces $\Tr_{\Lambda^k}(\ad_{H_{ab}}^\top \ad_{H_{cd}}) = c_k \delta_{\{a,b\},\{c,d\}}$, linearity gives $\|\ad_H|_{\Lambda^k}\|_{\HS}^2 = 2 E_H \binom{2n-2}{k-1}$. The exact rational simplification $\frac{2\binom{2n-2}{k-1}}{\binom{2n}{k}^2} = \frac{k(2n-k)}{n(2n-1)\binom{2n}{k}}$ is proved for all $n,k$ in Lean~4 (Theorem~3, \texttt{majorana\_casimir\_binomial\_identity}).
+
+For $\rho = |0\rangle\langle 0|^{\otimes n} = 2^{-n}\prod_{j=1}^n (I + Z_j)$, expanding in $Z$-strings gives $\binom{n}{m}$ orthogonal terms of Majorana degree $2m$ (since $Z_j = -i\gamma_{2j-1}\gamma_{2j} \in \Lambda^2$), each of squared norm $2^n / 4^n = 2^{-n}$, so $\|\Pi_{\Lambda^{2m}}(\rho)\|_{\HS}^2 = \binom{n}{m}/2^n$. Substituting into~\eqref{eq:thm31} yields~\eqref{eq:so2n-fock}. The exponential bound $4^n \le (2n+1)\binom{2n}{n}$ and the exact separation inequality $2^n \binom{n}{m} \le (2n+1)\binom{2n}{n}$ are proved in Lean~4 (Theorems~4--7 and~18).
+
+Finally, for even $n$, $\Lambda^n_\pm$ are swapped by any reflection $R_0 \in O(2n)$ with $\det(R_0)=-1$ that conjugates $H$ to an operator of equal energy $E_H$, so $\|\ad_H|_{\Lambda^n_+}\|_{\HS}^2 = \|\ad_H|_{\Lambda^n_-}\|_{\HS}^2 = \frac{1}{2}\|\ad_H|_{\Lambda^n}\|_{\HS}^2 = E_H\binom{2n-2}{n-1}$, while $\dim(\Lambda^n_\pm) = \frac{1}{2}\binom{2n}{n}$. Thus each chiral prefactor is $\frac{C/2}{(d/2)^2} = \frac{2C}{d^2}$. Because $P_{\mathrm{ferm}}|0\rangle\langle 0|^{\otimes n} = |0\rangle\langle 0|^{\otimes n}$, $\Pi_{\Lambda^n_-}(\rho) = 0$, immediately giving~\eqref{eq:hodge-selection} (Lean~4 Theorems~8--10).
+\end{proof}
+
+\subsection{\texorpdfstring{$U(1)$}{U(1)} Hamming-Weight Filling-Fraction Transition and Gate-Commutant Blind-Spot Theorem}
+
+Consider $U(1)$-symmetric (excitation-preserving) quantum circuits conserving total Hamming weight $N_Z = \sum_{j=1}^n \frac{I-Z_j}{2}$ (e.g.\ $XY$/fermionic-swap ans\"atze for quantum chemistry). The Hilbert space decomposes as $\mathcal{H} = \bigoplus_{w=0}^n \mathcal{H}_w$ with block dimension $d_w = \binom{n}{w}$, and the semisimple dynamical Lie group is $G = \prod_{w=1}^{n-1} SU(d_w)$ (plus abelian block phases). On block-diagonal operators $\bigoplus_w \Herm(d_w)$, the non-trivial adjoint irreps are the traceless spaces $V_w^\circ = i\su(d_w)$ of dimension $d_w^2 - 1$, with traceless projection $X_w^\circ := X_w - \frac{\Tr(X_w)}{d_w} I_{d_w}$.
+
+\begin{theorem}[$U(1)$ Filling-Fraction Transition and Gate-Commutant Blind-Spot Law]\label{thm:u1}
+Let $G = \prod_{w=1}^{n-1} SU(d_w)$ ($d_w = \binom{n}{w}$) with independent $G$-$2$-designs $U_L, U_R$ and $U(1)$-conserving generator $H = \bigoplus_w H_w$. For any block-diagonal state $\rho = \bigoplus_w \rho_w$ and observable $M = \bigoplus_w M_w$,
+\begin{equation}\label{eq:u1-exact}
+  \Var_{G\times G}(\partial_\theta C)
+  = \sum_{w : d_w \ge 2} \frac{2\, d_w\, \|H_w^\circ\|_{\HS}^2\, \|\rho_w^\circ\|_{\HS}^2\, \|M_w^\circ\|_{\HS}^2}{(d_w^2 - 1)^2}.
+\end{equation}
+Consequently:
+\begin{enumerate}[leftmargin=1.8em,itemsep=2pt]
+  \item \textbf{Filling-Fraction Phase Transition:} For a pure input state in sector $w$ ($\|\rho_w^\circ\|_{\HS}^2 = 1 - 1/d_w$), a two-qubit swap generator $H = \frac{1}{2}(X_1 X_2 + Y_1 Y_2)$ ($\|H_w^\circ\|_{\HS}^2 = 2\binom{n-2}{w-1}$), and local observable $M = Z_1$ ($\|M_w^\circ\|_{\HS}^2 = \frac{4\binom{n-1}{w-1}\binom{n-1}{w}}{\binom{n}{w}}$):
+  \begin{itemize}[leftmargin=1.4em,itemsep=1pt]
+    \item Fixed single-excitation sector $w=1$: $\Var = \frac{16(n-1)^2}{n(n^2-1)^2} = \Theta(n^{-3})$ (\emph{trainable});
+    \item Fixed two-excitation sector $w=2$: $\Var = \Theta(n^{-4})$ (\emph{trainable});
+    \item Half-filling sector $w = n/2$: $\Var = \Theta(\sqrt{n}\,2^{-n})$ (\emph{exponential barren plateau}, matching unstructured $SU(2^n)$ up to the Stirling factor $\sqrt{n}$).
+  \end{itemize}
+  \item \textbf{Gate-Commutant Blind-Spot Theorem:} If $H_w^\circ = 0$ on every sector supporting both $\rho_w^\circ$ and $M_w^\circ$---in particular for any collective $Z$-rotation $H = \sum_{j=1}^n Z_j$, which acts as the scalar $(n-2w)I_{d_w}$ on $\mathcal{H}_w$---then $\Var_{G\times G}(\partial_\theta C) = 0$ identically, even when $\|\rho_w^\circ\|_{\HS}^2 > 0$ and $\|M_w^\circ\|_{\HS}^2 > 0$. Conversely, any sector with $d_w \ge 2$ and strictly positive traceless norms $\|H_w^\circ\|_{\HS}^2, \|\rho_w^\circ\|_{\HS}^2, \|M_w^\circ\|_{\HS}^2 > 0$ yields strictly positive rational variance.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+On $i\su(d)$ with orthonormal basis $\{E_a\}_{a=1}^{d^2-1}$, the completeness relation $\sum_a (E_a)_{ij}(E_a)_{kl} = \delta_{il}\delta_{jk} - \frac{1}{d}\delta_{ij}\delta_{kl}$ gives $\sum_a \Tr([H^\circ, E_a]^\dagger [H^\circ, E_a]) = 2\Tr((H^\circ)^2)\Tr(I_d) - 2(\Tr H^\circ)^2 = 2 d \|H^\circ\|_{\HS}^2$. Substituting $\dim(V_w^\circ) = d_w^2 - 1$ and $\|\ad_H|_{V_w^\circ}\|_{\HS}^2 = 2 d_w \|H_w^\circ\|_{\HS}^2$ into Theorem~\ref{thm:adjoint-irrep} yields~\eqref{eq:u1-exact}. Setting $w = n/2$ with $d_{n/2} = \binom{n}{n/2} \sim \sqrt{\frac{2}{\pi n}} 2^n$, $\|H_{n/2}^\circ\|_{\HS}^2 = 2\binom{n-2}{n/2-1} \sim \frac{1}{2} d_{n/2}$, $\|\rho_{n/2}^\circ\|_{\HS}^2 \to 1$, and $\|M_{n/2}^\circ\|_{\HS}^2 = d_{n/2}$ gives $\Var_{n/2} \sim d_{n/2}^{-1} = \Theta(\sqrt{n}\,2^{-n})$. The traceless-scalar characterization, blind-spot annihilation, and strict positivity dichotomy are formally verified in Lean~4 (Theorems~11--13). Unstructured $SU(2^n)$ is the single-block special case $d = 2^n$ of~\eqref{eq:u1-exact}.
+\end{proof}
+
+\subsection{Zero-Shot Exact-\texorpdfstring{$\QQ$}{Q} Certification and Sample-Complexity Separation}
+
+\begin{theorem}[Soundness, Mutual Exclusivity, and Exponential Sample-Complexity Separation]\label{thm:cert}
+Let $\tau \in \QQ_{>0}$ be a user-specified trainability threshold and let $\Var \in \QQ_{\ge 0}$ be the exact rational variance of a symmetry-structured circuit over $G \in \{SO(2n),\, U(1),\, SU(2^n)\}$.
+\begin{enumerate}[leftmargin=1.8em,itemsep=2pt]
+  \item \textbf{Three-Way Mutually Exclusive Certification:} Every valid \certschema{} artifact assigns a unique verdict among \texttt{CERTIFIED\_\allowbreak TRAINABLE} ($\Var \ge \tau$), \texttt{CERTIFIED\_\allowbreak BARREN\_\allowbreak PLATEAU} ($0 < \Var < \tau$), and \texttt{CERTIFIED\_\allowbreak BLIND\_\allowbreak SPOT} ($\Var = 0$), while enforcing representation-theoretic multiplicity-freeness (forbidding complementary $SO(2n)$ pairs $\{k, 2n-k\}$ and reducible even-$n$ \texttt{full} middle sectors), uniform gate energy $E_H$, the sharp traceless state-purity bound $\sum_\lambda \|\Pi_{V_\lambda}(\rho)\|_{\HS}^2 \le 1 - 2^{-n}$, and the quadratic $U(1)$ multi-sector purity bound $\sum_{w: d_w \ge 2} \|\rho_w^\circ\|_{\HS}^2 / (1 - d_w^{-1}) \le 1$. No circuit can simultaneously satisfy \texttt{CERTIFIED\_\allowbreak TRAINABLE} at $\tau$ and \texttt{CERTIFIED\_\allowbreak BARREN\_\allowbreak PLATEAU} at $\varepsilon < \tau$, nor \texttt{CERTIFIED\_\allowbreak BLIND\_\allowbreak SPOT} and \texttt{CERTIFIED\_\allowbreak TRAINABLE} for any $\tau > 0$ (Lean~4 Theorems~15--16).
+  \item \textbf{Exponential Finite-Shot Sample-Complexity Separation:} Consider any unbiased finite-shot variance estimator $\widehat{V}_N = \frac{1}{N}\sum_{r=1}^N \hat{g}_{r,1}\hat{g}_{r,2}$ formed from $N$ independent pairs of single-shot parameter-shift gradient estimates ($\mathbb{E}[\hat{g}_{r,j} \mid U_L, U_R] = \partial_\theta C$, $\Var(\hat{g}_{r,j} \mid U_L, U_R) \ge B = \Theta(1)$ for a $\pm 1$-valued Pauli observable $M$). Resolving $\Var = \tau > 0$ from $\Var = 0$ to standard error $\sqrt{\Var(\widehat{V}_N)} \le \tau/2$ satisfies $4 B^2 \le N \tau^2$; hence whenever $B \ge k\tau$ ($k \in \NN$), at least $N \ge 4 k^2$ shot pairs are required (Lean~4 Theorem~17). At $B=1$, this yields $N = \Omega(4^n)$ for $SO(2n)$ ($k=n$) and $N = \Omega(4^n/n)$ for $U(1)$ half-filling ($9.49\times 10^{24}$ and $7.23\times 10^{22}$ shot pairs at $n=40$), whereas \certschema{} verifies the exact rational variance classically in $O(1)$ arithmetic operations per active sector using zero quantum shots.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+For Part~1, mutual exclusivity of \texttt{CERTIFIED\_TRAINABLE} vs.\ \texttt{CERTIFIED\_BARREN\_PLATEAU} (for $\varepsilon < \tau$) and vs.\ \texttt{CERTIFIED\_BLIND\_SPOT} follows directly from cross-multiplying positive denominators (Lean~4 Theorems~15--16). For $U(1)$ states $\rho = \bigoplus_w \rho_w$ with block weights $p_w = \Tr(\rho_w) \ge 0$ ($\sum_w p_w = 1$), each normalized block $\tilde{\rho}_w = \rho_w / p_w$ has $\Tr(\tilde{\rho}_w^2) \le 1$, so $\|\rho_w^\circ\|_{\HS}^2 = p_w^2 (\Tr(\tilde{\rho}_w^2) - d_w^{-1}) \le p_w^2(1 - d_w^{-1})$, yielding both $\|\rho_w^\circ\|_{\HS}^2 \le 1 - d_w^{-1}$ and $\sum_{w: d_w \ge 2} \frac{\|\rho_w^\circ\|_{\HS}^2}{1 - d_w^{-1}} \le \sum_w p_w^2 \le 1$.
+
+For Part~2, conditioned on $(U_L, U_R)$ with gradient $g = \partial_\theta C$, independent single-shot parameter-shift measurements $\hat{g}_{r,1}, \hat{g}_{r,2}$ satisfy $\mathbb{E}[\hat{g}_{r,1}\hat{g}_{r,2} \mid U_L, U_R] = g^2$ and $\Var(\hat{g}_{r,1}\hat{g}_{r,2} \mid U_L, U_R) = 2 g^2 \sigma_{\mathrm{shot}}^2 + \sigma_{\mathrm{shot}}^4 \ge \sigma_{\mathrm{shot}}^4$. By the law of total variance, $\Var(\widehat{V}_N) = \frac{1}{N}\Var(\hat{g}_{1,1}\hat{g}_{1,2}) \ge \frac{B^2}{N}$ where $B = \mathbb{E}[\sigma_{\mathrm{shot}}^2] = \Theta(1)$ for a Pauli observable (in contrast to noiseless statevector evaluation, where $\sigma_{\mathrm{shot}} = 0$ and $\sqrt{\Var(g^2)} = \Theta(\tau)$, as used in Experiment~2). Requiring $\sqrt{\Var(\widehat{V}_N)} \le \tau/2$ yields $4 B^2 \le N \tau^2$; applying Lean~4 Theorem~17 (\texttt{chebyshev\_sample\_complexity\_bound}) gives $N \ge 4 k^2$ for every $k \le B/\tau$, and substituting Theorem~\ref{thm:so2n} ($\tau = \Theta(2^{-n})$) and Theorem~\ref{thm:u1} ($\tau = \Theta(\sqrt{n}\,2^{-n})$) establishes the $\Omega(4^n)$ and $\Omega(4^n/n)$ lower bounds.
+\end{proof}
+
+\section{Zero-Dependency Lean~4 Formalization and Exact-\texorpdfstring{$\QQ$}{Q} Verifier}
+
+\paragraph{Lean~4 Kernel (\texttt{lean/LieTrainability.lean}).}
+We formalized all $18$ algebraic, combinatorial, Hodge-chiral, $U(1)$ commutant, verdict-exclusivity, and sample-complexity theorems in pure Lean~4~\cite{demoura2021lean4} (\texttt{leanprover/lean4:v4.35.0}) with \emph{zero} external libraries (no Mathlib), $0$~\texttt{sorry}, $0$~warnings, and $0$~\texttt{Classical.choice} axioms (verified via \texttt{\#print axioms} in \texttt{lean/AuditAxioms.lean}, relying exclusively on \texttt{propext} and \texttt{Quot.sound}, or no axioms at all). Table~\ref{tab:lean} catalogs all $18$ machine-checked theorems.
+
+\begin{remark}[Transparent Formalization Scope]
+Our Lean~4 kernel formally verifies the complete combinatorial and algebraic engine underlying Theorems~\ref{thm:adjoint-irrep}--\ref{thm:cert}: the exact absorption and symmetry laws of $\binom{n}{k}$, the $SO(2n)$ Casimir--binomial identity, the row sum $\sum_j \binom{m}{j} = 2^m$, central-binomial maximality, the exponential floor $4^n \le (2n+1)\binom{2n}{n}$, the poly-vs-exp separation $2^n\binom{n}{m} \le (2n+1)\binom{2n}{n}$, the even-$n$ Hodge-chiral $2\times/0\times/1\times$ identities, the $U(1)$ traceless scalar and positivity dichotomy laws, sum nonnegativity, strict verdict mutual exclusivity, and the cleared-integer Chebyshev lower bound $N \ge 4k^2$. The continuous Haar integration and Schur's lemma step in Theorem~\ref{thm:adjoint-irrep} are proved analytically in Section~3 and independently validated numerically by $12{,}000$-sample Haar Monte Carlo across all three group families in Section~5.
+\end{remark}
+
+\begin{table}[t]
+\centering
+\caption{All $18$ machine-checked theorems in \texttt{lean/LieTrainability.lean} (Lean~4 \texttt{v4.35.0}, zero external dependencies, $0$~\texttt{sorry}, $0$~\texttt{Classical.choice}, $0$~warnings).}
+\label{tab:lean}
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}rll@{}}
+\toprule
+\# & Lean~4 Theorem Identifier & Formalized Mathematical Statement \\
+\midrule
+1 & \texttt{nchoose\_absorption} & $(k+1)\binom{n+1}{k+1} = (n+1)\binom{n}{k}$ for all $n,k \in \NN$ \\
+2 & \texttt{nchoose\_symm} & $\binom{n}{k} = \binom{n}{n-k}$ for all $k \le n$ \\
+3 & \texttt{majorana\_casimir\_binomial\_identity} & $2n(2n-1)\binom{2n-2}{k-1} = k(2n-k)\binom{2n}{k}$ ($1 \le k \le 2n-1$) \\
+4 & \texttt{pow2\_sum\_nchoose} & $\sum_{j=0}^{m} \binom{m}{j} = 2^m$ \\
+5 & \texttt{nchoose\_le\_succ\_left} & $\binom{m}{j} \le \binom{m}{j+1}$ for $2j+1 \le m$ \\
+6 & \texttt{nchoose\_le\_central} & $\binom{2n}{j} \le \binom{2n}{n}$ for all $n,j \in \NN$ \\
+7 & \texttt{central\_binom\_exponential\_bound} & $4^n \le (2n+1)\binom{2n}{n}$ (barren-plateau floor) \\
+8 & \texttt{hodge\_chiral\_doubling} & $C_{\frac{1}{2}}(2d_{\frac{1}{2}})^2 = 2(2C_{\frac{1}{2}})d_{\frac{1}{2}}^2$ (chiral $2\times$ prefactor) \\
+9 & \texttt{hodge\_chiral\_orthogonality\_zero} & $2C(R\cdot 0 + 0\cdot M) = 0$ (cross-chiral blind spot) \\
+10 & \texttt{hodge\_chiral\_balanced\_recovers\_base} & $2C(rm + rm) = C(2r)(2m)$ (balanced recovery) \\
+11 & \texttt{u1\_traceless\_norm\_zero\_iff\_scalar} & $d\sum x_i^2 - (\sum x_i)^2 \ge 0$, $=0 \iff \forall i,j,\, x_i = x_j$ \\
+12 & \texttt{u1\_gate\_commutant\_blind\_spot} & $2d\cdot 0\cdot \|\rho^\circ\|^2 \|M^\circ\|^2 = 0$ (commutant blind spot) \\
+13 & \texttt{u1\_active\_sector\_variance\_pos} & $d\ge 2 \wedge h,\rho,M>0 \implies 2dh\rho M>0 \wedge (d^2-1)^2>0$ \\
+14 & \texttt{irrep\_variance\_sum\_nonneg} & $(\forall x \in L,\; x \ge 0) \implies 0 \le \sum L \;\wedge\; (\forall x \in L,\, x \le \sum L)$ \\
+15 & \texttt{mutual\_exclusivity\_trainable\_barren} & $\Var \ge \tau \wedge \Var \le \varepsilon \implies \tau \le \varepsilon$ (exclusivity) \\
+16 & \texttt{blind\_spot\_excludes\_trainable} & $\Var = 0 \wedge \tau > 0 \implies \neg(\Var \ge \tau)$ \\
+17 & \texttt{chebyshev\_sample\_complexity\_bound} & $k\tau \le B \wedge 4B^2 \le N\tau^2 \implies 4k^2 \le N$ \\
+18 & \texttt{matchgate\_poly\_vs\_exp\_separation} & $2^n\binom{n}{m} \le (2n+1)\binom{2n}{n}$ (exact poly/exp gap) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Zero-Floating-Point-Trust Verifier (\certschema{}).}
+The independent verifier \texttt{src/lie\_\allowbreak train\_\allowbreak certifier.py} imports \emph{only} Python standard-library modules (\texttt{fractions.\allowbreak Fraction}, \texttt{math.comb}, and \texttt{re})---with zero NumPy, zero SciPy, and zero floating-point operations. It enforces strict recursive type whitelisting (via \texttt{type(x) is ...}, rejecting \texttt{float}, \texttt{bool}, \texttt{Decimal}, \texttt{tuple}, and non-\texttt{str} keys), single-line ASCII identifier hygiene on \texttt{cert\_id}, exact dictionary key sets at every level, an anchored ASCII canonical rational parser (rejecting \texttt{-0}, \texttt{1/1}, unreduced fractions, leading signs/zeros, whitespace, and Unicode digits), representation-theoretic multiplicity-freeness (forbidding duplicate sectors, complementary $SO(2n)$ pairs $\{k, 2n-k\}$, and reducible even-$n$ \texttt{full} middle sectors), uniform gate energy $E_H$ across all $SO(2n)$ sectors, zero traceless norms on $1$-dimensional $U(1)$ blocks ($w \in \{0, n\}$), exact recomputation of DLA dimensions, irrep dimensions, Casimir norms, sector variances, and total variance in $\QQ$, both the global traceless purity bound $\sum_\lambda \|\Pi_{V_\lambda}(\rho)\|_{\HS}^2 \le 1 - 2^{-n}$ and the quadratic $U(1)$ multi-sector purity bound $\sum_{w: d_w \ge 2} \|\rho_w^\circ\|_{\HS}^2 / (1 - d_w^{-1}) \le 1$, and three-way verdict mutual exclusivity.
+
+\section{Computational Experiments and Adversarial Red-Teaming}
+
+All four experiments are deterministic and reproducible in $<1.2$\,s via \texttt{scripts/run\_\allowbreak all\_\allowbreak experiments.py} and verified end-to-end by \texttt{scripts/verify\_all.py}.
+
+\paragraph{Experiment 1: Atlas of $12$ Exact-$\QQ$ Certificates ($n=4$ to $n=100$).}
+Table~\ref{tab:certs} summarizes $12$ independently verified \certschema{} certificates spanning all three compact Lie families and all three verdict modes. Notably, \texttt{so2n\_n10\_k4\_\allowbreak outside\_dla\_trainable} certifies polynomial trainability ($\Var = 96/30685$) for $Z_1 Z_2 \notin i\so(20)$ outside $i\so(20)$; \texttt{so2n\_n20\_kn\_\allowbreak barren\_in\_poly\_dla} and \texttt{so2n\_n50\_kn\_\allowbreak barren\_50q} certify exponential barren plateaus ($6.87\times 10^{-7}$ and $6.33\times 10^{-16}$) using explicit irreducible chiral sectors $\Lambda^n_+ \oplus \Lambda^n_-$ within quadratic-dimensional $\so(2n)$; \texttt{so2n\_n4\_hodge\_\allowbreak chiral\_plus\_2x} and \texttt{so2n\_n4\_hodge\_\allowbreak chiral\_blind\_spot} certify the exact $2\times$ amplification ($24/245$ vs.\ $12/245$) and exact $0$-variance blind spot; \texttt{u1\_n12\_scalar\_\allowbreak gate\_blind\_spot} certifies the scalar-gate commutant blind spot; and \texttt{so2n\_n100\_k2\_\allowbreak large\_scale} certifies a $100$-qubit matchgate circuit ($\Var = 99/990025$) in $0.15$\,ms.
+
+\begin{table}[t]
+\centering
+\caption{Experiment~1: $12$ independently verified zero-float \certschema{} certificates spanning $SO(2n)$, $U(1)$, and $SU(2^n)$ up to $n=100$ qubits (all verified in $\le 0.32$\,ms; exact full fractions stored in \texttt{results/certificates/*.cert.json}).}
+\label{tab:certs}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llrrllllr@{}}
+\toprule
+Certificate ID & Family & $n$ & $\dim\lieg$ & $\tau$ & Exact $\Var \in \QQ$ & Float & Verdict & ms \\
+\midrule
+\texttt{so2n\_n20\_k2\_trainable} & $SO(2n)$ & $20$ & $780$ & $10^{-4}$ & $19/7605$ & $2.50\times 10^{-3}$ & \texttt{TRAINABLE} & $0.23$ \\
+\texttt{so2n\_n10\_k4\_outside\_dla\_trainable} & $SO(2n)$ & $10$ & $190$ & $10^{-5}$ & $96/30685$ & $3.13\times 10^{-3}$ & \texttt{TRAINABLE} & $0.18$ \\
+\texttt{so2n\_n20\_kn\_barren\_in\_poly\_dla} & $SO(2n)$ & $20$ & $780$ & $10^{-4}$ & $1292/1879725393$ & $6.87\times 10^{-7}$ & \texttt{BARREN} & $0.23$ \\
+\texttt{so2n\_n50\_kn\_barren\_50q} & $SO(2n)$ & $50$ & $4950$ & $10^{-6}$ & $7.51{\cdot}10^{9}/1.19{\cdot}10^{25}$ & $6.33\times 10^{-16}$ & \texttt{BARREN} & $0.22$ \\
+\texttt{so2n\_n4\_hodge\_chiral\_plus\_2x} & $SO(2n)$ & $4$ & $28$ & $10^{-2}$ & $24/245$ & $9.80\times 10^{-2}$ & \texttt{TRAINABLE} & $0.32$ \\
+\texttt{so2n\_n4\_hodge\_chiral\_blind\_spot} & $SO(2n)$ & $4$ & $28$ & $10^{-3}$ & $0$ & $0$ & \texttt{BLIND\_SPOT} & $0.21$ \\
+\texttt{so2n\_n12\_multisector\_k2\_k4} & $SO(2n)$ & $12$ & $276$ & $10^{-3}$ & $97/11109$ & $8.73\times 10^{-3}$ & \texttt{TRAINABLE} & $0.17$ \\
+\texttt{u1\_n20\_w1\_trainable} & $U(1)$ & $20$ & $1.38{\cdot}10^{11}$ & $10^{-4}$ & $4/2205$ & $1.81\times 10^{-3}$ & \texttt{TRAINABLE} & $0.16$ \\
+\texttt{u1\_n30\_half\_filling\_barren} & $U(1)$ & $30$ & $1.18{\cdot}10^{17}$ & $10^{-6}$ & $2.49{\cdot}10^{16}/3.73{\cdot}10^{24}$ & $6.67\times 10^{-9}$ & \texttt{BARREN} & $0.19$ \\
+\texttt{u1\_n12\_scalar\_gate\_blind\_spot} & $U(1)$ & $12$ & $2.70{\cdot}10^{6}$ & $10^{-4}$ & $0$ & $0$ & \texttt{BLIND\_SPOT} & $0.18$ \\
+\texttt{su\_n20\_unstructured\_barren} & $SU(2^n)$ & $20$ & $1.10{\cdot}10^{12}$ & $10^{-6}$ & $5.50{\cdot}10^{11}/1.15{\cdot}10^{18}$ & $4.77\times 10^{-7}$ & \texttt{BARREN} & $0.14$ \\
+\texttt{so2n\_n100\_k2\_large\_scale} & $SO(2n)$ & $100$ & $19900$ & $10^{-5}$ & $99/990025$ & $1.00\times 10^{-4}$ & \texttt{TRAINABLE} & $0.15$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\paragraph{Experiment 2: Independent Haar Monte Carlo Cross-Check.}
+To verify Theorems~\ref{thm:adjoint-irrep}--\ref{thm:u1} completely independently of our algebraic code, we drew $N = 12{,}000$ independent Haar-random pairs $(U_L, U_R)$ from $SO(6)$ ($k = 1, 2, 3, 4$), $SO(4)$ (aligned $(+,+)$ and $(-,-)$ Hodge-chiral $2\times$ pairs plus cross-chiral $(+,-)$ blind spot), $U(1)$ ($SU(6)$ block at $n=4, w=2$), and unstructured $SU(8)$ ($n=3$). As shown in Table~\ref{tab:mc} and Figure~\ref{fig:mc}, every single benchmark agrees with our exact-$\QQ$ predictions within $1.24\sigma$ ($\max z = 1.24$), and the $(+,-)$ chiral blind spot yields $1.58\times 10^{-32}$ (machine-precision zero).
+
+\begin{table}[t]
+\centering
+\caption{Experiment~2: Exact-$\QQ$ adjoint-irrep predictions versus independent $N=12{,}000$ Haar Monte Carlo across nine configurations ($\max z = 1.24$).}
+\label{tab:mc}
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{@{}llrrrrr@{}}
+\toprule
+Benchmark & Family & Exact $\QQ$ & Exact float & Haar MC $\widehat{\Var}$ & MC SE ($\sigma$) & $|z|$ \\
+\midrule
+\texttt{SO(6)\_k1} & $SO(2n)$ & $1/18$ & $0.05556$ & $0.05472$ & $0.00076$ & $1.10$ \\
+\texttt{SO(6)\_k2} & $SO(2n)$ & $8/225$ & $0.03556$ & $0.03564$ & $0.00051$ & $0.17$ \\
+\texttt{SO(6)\_k3} & $SO(2n)$ & $3/100$ & $0.03000$ & $0.02954$ & $0.00043$ & $1.06$ \\
+\texttt{SO(6)\_k4} & $SO(2n)$ & $8/225$ & $0.03556$ & $0.03497$ & $0.00050$ & $1.16$ \\
+\texttt{SO(4)\_chiral\_++\_2x} & $SO(2n)$ & $2/9$ & $0.22222$ & $0.22077$ & $0.00217$ & $0.67$ \\
+\texttt{SO(4)\_chiral\_--\_2x} & $SO(2n)$ & $2/9$ & $0.22222$ & $0.22459$ & $0.00219$ & $1.08$ \\
+\texttt{SO(4)\_chiral\_+-\_blind} & $SO(2n)$ & $0$ & $0.00000$ & $1.58\times 10^{-32}$ & $2.47\times 10^{-34}$ & --- \\
+\texttt{U1\_n4\_w2\_SU6} & $U(1)$ & $6/49$ & $0.12245$ & $0.12361$ & $0.00162$ & $0.72$ \\
+\texttt{SU8\_n3\_unstructured} & $SU(2^n)$ & $32/567$ & $0.05644$ & $0.05561$ & $0.00067$ & $1.24$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig1_phase_transitions.png}
+\caption{Experiment~3: Exact-$\QQ$ gradient variance scaling across $n=4\dots 40$ qubits. \textbf{(a)}~Matchgate $SO(2n)$ exhibits a sharp phase transition inside the quadratic DLA $\dim\so(2n) = n(2n-1)$: $k=2$ ($Z_1 \in i\so(2n)$, $\Theta(n^{-2})$) and $k=4$ ($Z_1 Z_2 \notin i\so(2n)$, $\Theta(n^{-3})$) remain trainable, whereas $k=n$ decays as $\Theta(2^{-n})$ (with exact $2\times$ boost on $\Lambda^n_+$). \textbf{(b)}~$U(1)$ Hamming-weight sectors transition from $\Theta(n^{-3})$ ($w=1$) and $\Theta(n^{-4})$ ($w=2$) trainability to $\Theta(\sqrt{n}\,2^{-n})$ barren plateaus at half-filling $w=n/2$.}
+\label{fig:phases}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig2_haar_mc_hodge_chiral.png}
+\caption{Experiment~2: Exact-$\QQ$ adjoint-irrep predictions (blue) versus independent $12{,}000$-sample Haar Monte Carlo (orange, $\pm 2\sigma$ error bars) across $SO(6)$ ($k=1\dots 4$), $SO(4)$ Hodge-chiral $(+,+)$, $(-,-)$ ($2\times$ boost) and $(+,-)$ (exact $0$ blind spot), $U(1)$ ($SU(6)$ block), and unstructured $SU(8)$. Every benchmark matches within $1.24\sigma$.}
+\label{fig:mc}
+\end{figure}
+
+\paragraph{Experiments 3 \& 4: Phase Transitions and Sampling-Cost Wall.}
+Figure~\ref{fig:phases} plots exact-$\QQ$ variance trajectories across $n=4\dots 40$ qubits, displaying a $9.63\times 10^8$-fold separation between $k=2$ ($6.25\times 10^{-4}$) and $k=n$ ($6.49\times 10^{-13}$) within quadratic $\so(80)$ at $n=40$. Figure~\ref{fig:wall} quantifies Theorem~\ref{thm:cert}: finite-shot Chebyshev sampling bounds explode to $9.49\times 10^{24}$ shot pairs ($SO(2n)$, $k=n$) and $7.23\times 10^{22}$ shot pairs ($U(1)$, $w=n/2$) at $n=40$, while exact-$\QQ$ verification of the explicit chiral-sector certificate stays flat at $0.062$--$0.101$\,ms with zero quantum shots.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig3_sample_complexity_separation.png}
+\caption{Experiment~4: \textbf{(a)}~Finite-shot Chebyshev sampling lower bound $N \ge 4/\tau^2$ ($B=1$) reaches $9.49\times 10^{24}$ shot pairs for $SO(2n)$ ($k=n$) and $7.23\times 10^{22}$ shot pairs for $U(1)$ half-filling at $n=40$, versus $0$ quantum shots for \certschema{}. \textbf{(b)}~Pure-stdlib exact-$\QQ$ verification runtime remains flat at $0.06$--$0.10$\,ms across $n=4\dots 40$.}
+\label{fig:wall}
+\end{figure}
+
+\paragraph{Adversarial Red-Team Verification ($48/48$ Attacks Rejected).}
+Our automated test suite (\texttt{tests/test\_suite.py}) subjects \texttt{verify\_lie\_\allowbreak trainability\_\allowbreak certificate\_exact} to $48$ targeted forgery attempts across six attack classes: (i)~schema/type/key-set tampering and control-character \texttt{cert\_id} injection (floats, bools, \texttt{Decimal}, tuples, extra/missing/non-\texttt{str} keys, unknown family, embedded newlines); (ii)~canonical rational parser bypasses (unreduced fractions, denominator $1$, \texttt{-0}, \texttt{+1}, leading zeros, trailing newlines, Unicode digits, $\tau = 0$); (iii)~representation-theoretic and algebraic forgeries (wrong DLA/irrep dimensions, forged Casimir/variance, complementary $SO(2n)$ pairs $\{k, 2n-k\}$, reducible even-$n$ \texttt{full} middle sectors, inconsistent gate energy $E_H$ across sectors, chirality on odd $n$ or $k \ne n$, mixing \texttt{full} and chiral sectors, duplicate sectors); (iv)~physical purity and $1$D-block violations ($\sum \|\Pi_\lambda(\rho)\|_{\HS}^2 > 1-2^{-n}$, per-sector $\|\rho_w^\circ\|_{\HS}^2 > 1-d_w^{-1}$, multi-sector $U(1)$ weighted purity $>1$, nonzero traceless norms on $w \in \{0, n\}$); and (v)~verdict mutual-exclusivity flips across \texttt{TRAINABLE}, \texttt{BARREN\_PLATEAU}, and \texttt{BLIND\_SPOT}. All $48/48$ attacks raise \texttt{ValueError}.
+
+\section{Discussion and Limitations}
+
+Our framework sharpens Lie-algebraic barren-plateau theory in two complementary directions: it proves that polynomial DLA dimension is \emph{neither necessary nor sufficient} for observable-agnostic trainability (since $k=4$ is trainable with $Z_1 Z_2 \notin i\so(2n)$ while $k=n$ is exponentially barren within a circuit whose DLA $\so(2n)$ has quadratic dimension), and it uncovers exact real-irrep chirality ($2\times / 0\times$), complementary-degree parity, and commutant blind spots that are invisible to coarse dimension bounds.
+
+Two explicit limitations define clear directions for future work. First, Theorem~\ref{thm:adjoint-irrep} assumes the $G$-$2$-design regime and multiplicity-free real irreducible decompositions; extending exact-$\QQ$ certification to finite-depth approximate $2$-designs (by adding exact spectral-gap error envelopes) and to non-multiplicity-free representations (such as $S_n$-equivariant circuits with higher multiplicities, where Schur's lemma produces block matrices of size $m_\lambda \times m_\lambda$) is a natural next step. Second, \certschema{} verifies the algebraic variance given exact rational projection norms $\|\Pi_{V_\lambda}(\rho)\|_{\HS}^2$ and $\|\Pi_{V_\lambda}(M)\|_{\HS}^2$; automating the rational norm extraction directly from arbitrary Pauli-sum Hamiltonians and stabilizer/Fock state descriptions would enable turnkey pre-execution screening for quantum compilers.
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

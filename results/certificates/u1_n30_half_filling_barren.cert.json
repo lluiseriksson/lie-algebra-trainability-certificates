@@ -1,0 +1,27 @@
+{
+  "schema_version": "LIE-TRAIN-CERT-1.0",
+  "cert_id": "u1_n30_half_filling_barren",
+  "family": "u1_hamming",
+  "n_qubits": 30,
+  "dla_dimension": 118264581564861393,
+  "threshold_tau": "1/1000000",
+  "verdict": "CERTIFIED_BARREN_PLATEAU",
+  "exact_variance": "24891150011328000/3732351701776443746840879",
+  "sectors": [
+    {
+      "hamming_weight": 15,
+      "block_dim": 155117520,
+      "irrep_dim": 24061445010950399,
+      "H_traceless_norm_sq": "80233200",
+      "casimir_ad_norm_sq": "24891150011328000",
+      "rho_traceless_norm_sq": "155117519/155117520",
+      "M_traceless_norm_sq": "155117520",
+      "sector_variance": "24891150011328000/3732351701776443746840879"
+    }
+  ],
+  "physical_checks": {
+    "total_rho_proj_norm_sq": "155117519/155117520",
+    "rho_purity_bound_ok": 1,
+    "all_sectors_distinct": 1
+  }
+}

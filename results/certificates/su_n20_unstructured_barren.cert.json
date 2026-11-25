@@ -1,0 +1,26 @@
+{
+  "schema_version": "LIE-TRAIN-CERT-1.0",
+  "cert_id": "su_n20_unstructured_barren",
+  "family": "su_unstructured",
+  "n_qubits": 20,
+  "dla_dimension": 1099511627775,
+  "threshold_tau": "1/1000000",
+  "verdict": "CERTIFIED_BARREN_PLATEAU",
+  "exact_variance": "549755813888/1152922604117426175",
+  "sectors": [
+    {
+      "hilbert_dim": 1048576,
+      "irrep_dim": 1099511627775,
+      "H_traceless_norm_sq": "262144",
+      "casimir_ad_norm_sq": "549755813888",
+      "rho_traceless_norm_sq": "1048575/1048576",
+      "M_traceless_norm_sq": "1048576",
+      "sector_variance": "549755813888/1152922604117426175"
+    }
+  ],
+  "physical_checks": {
+    "total_rho_proj_norm_sq": "1048575/1048576",
+    "rho_purity_bound_ok": 1,
+    "all_sectors_distinct": 1
+  }
+}

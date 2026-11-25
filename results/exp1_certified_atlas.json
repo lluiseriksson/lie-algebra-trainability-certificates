@@ -1,0 +1,152 @@
+{
+  "experiment": "exp1_certified_atlas",
+  "num_certificates": 12,
+  "all_verified": true,
+  "max_verify_ms": 0.321,
+  "certificates": [
+    {
+      "cert_id": "so2n_n20_k2_trainable",
+      "family": "so2n_majorana",
+      "n_qubits": 20,
+      "dla_dimension": 780,
+      "threshold_tau": "1/10000",
+      "verdict": "CERTIFIED_TRAINABLE",
+      "exact_variance": "19/7605",
+      "exact_variance_float": 0.0024983563445101905,
+      "verify_ms": 0.227,
+      "verified": true
+    },
+    {
+      "cert_id": "so2n_n10_k4_outside_dla_trainable",
+      "family": "so2n_majorana",
+      "n_qubits": 10,
+      "dla_dimension": 190,
+      "threshold_tau": "1/100000",
+      "verdict": "CERTIFIED_TRAINABLE",
+      "exact_variance": "96/30685",
+      "exact_variance_float": 0.0031285644451686493,
+      "verify_ms": 0.182,
+      "verified": true
+    },
+    {
+      "cert_id": "so2n_n20_kn_barren_in_poly_dla",
+      "family": "so2n_majorana",
+      "n_qubits": 20,
+      "dla_dimension": 780,
+      "threshold_tau": "1/10000",
+      "verdict": "CERTIFIED_BARREN_PLATEAU",
+      "exact_variance": "1292/1879725393",
+      "exact_variance_float": 6.873344398130392e-07,
+      "verify_ms": 0.229,
+      "verified": true
+    },
+    {
+      "cert_id": "so2n_n50_kn_barren_50q",
+      "family": "so2n_majorana",
+      "n_qubits": 50,
+      "dla_dimension": 4950,
+      "threshold_tau": "1/1000000",
+      "verdict": "CERTIFIED_BARREN_PLATEAU",
+      "exact_variance": "7511349650/11870077757350112589660921",
+      "exact_variance_float": 6.327970046656915e-16,
+      "verify_ms": 0.22,
+      "verified": true
+    },
+    {
+      "cert_id": "so2n_n4_hodge_chiral_plus_2x",
+      "family": "so2n_majorana",
+      "n_qubits": 4,
+      "dla_dimension": 28,
+      "threshold_tau": "1/100",
+      "verdict": "CERTIFIED_TRAINABLE",
+      "exact_variance": "24/245",
+      "exact_variance_float": 0.09795918367346938,
+      "verify_ms": 0.321,
+      "verified": true
+    },
+    {
+      "cert_id": "so2n_n4_hodge_chiral_blind_spot",
+      "family": "so2n_majorana",
+      "n_qubits": 4,
+      "dla_dimension": 28,
+      "threshold_tau": "1/1000",
+      "verdict": "CERTIFIED_BLIND_SPOT",
+      "exact_variance": "0",
+      "exact_variance_float": 0.0,
+      "verify_ms": 0.21,
+      "verified": true
+    },
+    {
+      "cert_id": "so2n_n12_multisector_k2_k4",
+      "family": "so2n_majorana",
+      "n_qubits": 12,
+      "dla_dimension": 276,
+      "threshold_tau": "1/1000",
+      "verdict": "CERTIFIED_TRAINABLE",
+      "exact_variance": "97/11109",
+      "exact_variance_float": 0.008731659015212891,
+      "verify_ms": 0.172,
+      "verified": true
+    },
+    {
+      "cert_id": "u1_n20_w1_trainable",
+      "family": "u1_hamming",
+      "n_qubits": 20,
+      "dla_dimension": 137846528799,
+      "threshold_tau": "1/10000",
+      "verdict": "CERTIFIED_TRAINABLE",
+      "exact_variance": "4/2205",
+      "exact_variance_float": 0.0018140589569160999,
+      "verify_ms": 0.156,
+      "verified": true
+    },
+    {
+      "cert_id": "u1_n30_half_filling_barren",
+      "family": "u1_hamming",
+      "n_qubits": 30,
+      "dla_dimension": 118264581564861393,
+      "threshold_tau": "1/1000000",
+      "verdict": "CERTIFIED_BARREN_PLATEAU",
+      "exact_variance": "24891150011328000/3732351701776443746840879",
+      "exact_variance_float": 6.669025858276124e-09,
+      "verify_ms": 0.19,
+      "verified": true
+    },
+    {
+      "cert_id": "u1_n12_scalar_gate_blind_spot",
+      "family": "u1_hamming",
+      "n_qubits": 12,
+      "dla_dimension": 2704143,
+      "threshold_tau": "1/10000",
+      "verdict": "CERTIFIED_BLIND_SPOT",
+      "exact_variance": "0",
+      "exact_variance_float": 0.0,
+      "verify_ms": 0.182,
+      "verified": true
+    },
+    {
+      "cert_id": "su_n20_unstructured_barren",
+      "family": "su_unstructured",
+      "n_qubits": 20,
+      "dla_dimension": 1099511627775,
+      "threshold_tau": "1/1000000",
+      "verdict": "CERTIFIED_BARREN_PLATEAU",
+      "exact_variance": "549755813888/1152922604117426175",
+      "exact_variance_float": 4.768367034566415e-07,
+      "verify_ms": 0.143,
+      "verified": true
+    },
+    {
+      "cert_id": "so2n_n100_k2_large_scale",
+      "family": "so2n_majorana",
+      "n_qubits": 100,
+      "dla_dimension": 19900,
+      "threshold_tau": "1/100000",
+      "verdict": "CERTIFIED_TRAINABLE",
+      "exact_variance": "99/990025",
+      "exact_variance_float": 9.999747481124213e-05,
+      "verify_ms": 0.15,
+      "verified": true
+    }
+  ]
+}

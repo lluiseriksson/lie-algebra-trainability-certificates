@@ -1,0 +1,27 @@
+{
+  "schema_version": "LIE-TRAIN-CERT-1.0",
+  "cert_id": "so2n_n10_k4_outside_dla_trainable",
+  "family": "so2n_majorana",
+  "n_qubits": 10,
+  "dla_dimension": 190,
+  "threshold_tau": "1/100000",
+  "verdict": "CERTIFIED_TRAINABLE",
+  "exact_variance": "96/30685",
+  "sectors": [
+    {
+      "k_degree": 4,
+      "chirality": "full",
+      "irrep_dim": 4845,
+      "gate_energy": "1",
+      "casimir_ad_norm_sq": "1632",
+      "rho_proj_norm_sq": "45/1024",
+      "M_proj_norm_sq": "1024",
+      "sector_variance": "96/30685"
+    }
+  ],
+  "physical_checks": {
+    "total_rho_proj_norm_sq": "45/1024",
+    "rho_purity_bound_ok": 1,
+    "all_sectors_distinct": 1
+  }
+}

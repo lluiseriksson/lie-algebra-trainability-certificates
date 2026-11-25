@@ -1,0 +1,89 @@
+{
+  "experiment": "exp2_haar_mc_crosscheck",
+  "num_samples_per_check": 12000,
+  "num_checks": 9,
+  "max_z_score": 1.2393166365507917,
+  "checks": [
+    {
+      "label": "SO(6)_k1",
+      "family": "so2n_majorana",
+      "exact_q": "1/18",
+      "exact_float": 0.05555555555555555,
+      "mc_var": 0.0547153606484745,
+      "mc_se": 0.0007632862135404584,
+      "z_score": 1.100759966807021
+    },
+    {
+      "label": "SO(6)_k2",
+      "family": "so2n_majorana",
+      "exact_q": "8/225",
+      "exact_float": 0.035555555555555556,
+      "mc_var": 0.03564278732642872,
+      "mc_se": 0.0005144528516470996,
+      "z_score": 0.16956222634178847
+    },
+    {
+      "label": "SO(6)_k3",
+      "family": "so2n_majorana",
+      "exact_q": "3/100",
+      "exact_float": 0.03,
+      "mc_var": 0.029539458906602124,
+      "mc_se": 0.0004345073678068713,
+      "z_score": 1.0599154986080113
+    },
+    {
+      "label": "SO(6)_k4",
+      "family": "so2n_majorana",
+      "exact_q": "8/225",
+      "exact_float": 0.035555555555555556,
+      "mc_var": 0.03497461111075055,
+      "mc_se": 0.0005003439877273604,
+      "z_score": 1.1610900881286583
+    },
+    {
+      "label": "SO(4)_chiral_++_2x",
+      "family": "so2n_majorana",
+      "exact_q": "2/9",
+      "exact_float": 0.2222222222222222,
+      "mc_var": 0.22077394696994346,
+      "mc_se": 0.002171182021166074,
+      "z_score": 0.6670446043491688
+    },
+    {
+      "label": "SO(4)_chiral_--_2x",
+      "family": "so2n_majorana",
+      "exact_q": "2/9",
+      "exact_float": 0.2222222222222222,
+      "mc_var": 0.22458572181811004,
+      "mc_se": 0.002186946109749668,
+      "z_score": 1.0807306066441535
+    },
+    {
+      "label": "SO(4)_chiral_+-_blind",
+      "family": "so2n_majorana",
+      "exact_q": "0",
+      "exact_float": 0.0,
+      "mc_var": 1.577652740932291e-32,
+      "mc_se": 2.4686044660384143e-34,
+      "z_score": 0.0
+    },
+    {
+      "label": "U1_n4_w2_SU6",
+      "family": "u1_hamming",
+      "exact_q": "6/49",
+      "exact_float": 0.12244897959183673,
+      "mc_var": 0.1236113533095986,
+      "mc_se": 0.0016182114868043148,
+      "z_score": 0.7183076669770508
+    },
+    {
+      "label": "SU8_n3_unstructured",
+      "family": "su_unstructured",
+      "exact_q": "32/567",
+      "exact_float": 0.0564373897707231,
+      "mc_var": 0.055612178277850755,
+      "mc_se": 0.0006658600946155589,
+      "z_score": 1.2393166365507917
+    }
+  ]
+}

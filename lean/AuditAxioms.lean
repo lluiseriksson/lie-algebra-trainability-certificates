@@ -1,0 +1,20 @@
+import LieTrainability
+
+#print axioms LieTrainability.nchoose_absorption
+#print axioms LieTrainability.nchoose_symm
+#print axioms LieTrainability.majorana_casimir_binomial_identity
+#print axioms LieTrainability.pow2_sum_nchoose
+#print axioms LieTrainability.nchoose_le_succ_left
+#print axioms LieTrainability.nchoose_le_central
+#print axioms LieTrainability.central_binom_exponential_bound
+#print axioms LieTrainability.hodge_chiral_doubling
+#print axioms LieTrainability.hodge_chiral_orthogonality_zero
+#print axioms LieTrainability.hodge_chiral_balanced_recovers_base
+#print axioms LieTrainability.u1_traceless_norm_zero_iff_scalar
+#print axioms LieTrainability.u1_gate_commutant_blind_spot
+#print axioms LieTrainability.u1_active_sector_variance_pos
+#print axioms LieTrainability.irrep_variance_sum_nonneg
+#print axioms LieTrainability.mutual_exclusivity_trainable_barren
+#print axioms LieTrainability.blind_spot_excludes_trainable
+#print axioms LieTrainability.chebyshev_sample_complexity_bound
+#print axioms LieTrainability.matchgate_poly_vs_exp_separation

@@ -1,0 +1,37 @@
+{
+  "schema_version": "LIE-TRAIN-CERT-1.0",
+  "cert_id": "so2n_n12_multisector_k2_k4",
+  "family": "so2n_majorana",
+  "n_qubits": 12,
+  "dla_dimension": 276,
+  "threshold_tau": "1/1000",
+  "verdict": "CERTIFIED_TRAINABLE",
+  "exact_variance": "97/11109",
+  "sectors": [
+    {
+      "k_degree": 2,
+      "chirality": "full",
+      "irrep_dim": 276,
+      "gate_energy": "1",
+      "casimir_ad_norm_sq": "44",
+      "rho_proj_norm_sq": "3/1024",
+      "M_proj_norm_sq": "4096",
+      "sector_variance": "11/1587"
+    },
+    {
+      "k_degree": 4,
+      "chirality": "full",
+      "irrep_dim": 10626,
+      "gate_energy": "1",
+      "casimir_ad_norm_sq": "3080",
+      "rho_proj_norm_sq": "33/2048",
+      "M_proj_norm_sq": "4096",
+      "sector_variance": "20/11109"
+    }
+  ],
+  "physical_checks": {
+    "total_rho_proj_norm_sq": "39/2048",
+    "rho_purity_bound_ok": 1,
+    "all_sectors_distinct": 1
+  }
+}

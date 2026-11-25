@@ -1,0 +1,27 @@
+{
+  "schema_version": "LIE-TRAIN-CERT-1.0",
+  "cert_id": "u1_n20_w1_trainable",
+  "family": "u1_hamming",
+  "n_qubits": 20,
+  "dla_dimension": 137846528799,
+  "threshold_tau": "1/10000",
+  "verdict": "CERTIFIED_TRAINABLE",
+  "exact_variance": "4/2205",
+  "sectors": [
+    {
+      "hamming_weight": 1,
+      "block_dim": 20,
+      "irrep_dim": 399,
+      "H_traceless_norm_sq": "2",
+      "casimir_ad_norm_sq": "80",
+      "rho_traceless_norm_sq": "19/20",
+      "M_traceless_norm_sq": "19/5",
+      "sector_variance": "4/2205"
+    }
+  ],
+  "physical_checks": {
+    "total_rho_proj_norm_sq": "19/20",
+    "rho_purity_bound_ok": 1,
+    "all_sectors_distinct": 1
+  }
+}

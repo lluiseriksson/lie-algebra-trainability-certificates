@@ -1,0 +1,75 @@
+{
+  "experiment": "exp4_sample_complexity_separation",
+  "records": [
+    {
+      "n": 4,
+      "chebyshev_N_k2": 1067.111111111111,
+      "chebyshev_N_kn": 1667.361111111111,
+      "chebyshev_N_u1_half": 104.21006944444444,
+      "exact_q_verify_ms": 0.101
+    },
+    {
+      "n": 6,
+      "chebyshev_N_k2": 5270.76,
+      "chebyshev_N_kn": 28696.36,
+      "chebyshev_N_u1_half": 1218.88265625,
+      "exact_q_verify_ms": 0.088
+    },
+    {
+      "n": 8,
+      "chebyshev_N_k2": 16530.61224489796,
+      "chebyshev_N_kn": 475361.0012755102,
+      "chebyshev_N_u1_half": 15431.761892984694,
+      "exact_q_verify_ms": 0.086
+    },
+    {
+      "n": 10,
+      "chebyshev_N_k2": 40222.53086419753,
+      "chebyshev_N_kn": 7761813.688898967,
+      "chebyshev_N_u1_half": 207382.6285208139,
+      "exact_q_verify_ms": 0.091
+    },
+    {
+      "n": 12,
+      "chebyshev_N_k2": 83258.47933884297,
+      "chebyshev_N_kn": 125855648.79708703,
+      "chebyshev_N_u1_half": 2875843.9576680292,
+      "exact_q_verify_ms": 0.098
+    },
+    {
+      "n": 16,
+      "chebyshev_N_k2": 262690.41777777777,
+      "chebyshev_N_kn": 32753026675.752483,
+      "chebyshev_N_u1_half": 582407715.2332823,
+      "exact_q_verify_ms": 0.097
+    },
+    {
+      "n": 20,
+      "chebyshev_N_k2": 640842.3822714682,
+      "chebyshev_N_kn": 8466887330198.2295,
+      "chebyshev_N_u1_half": 123227888059.66992,
+      "exact_q_verify_ms": 0.095
+    },
+    {
+      "n": 24,
+      "chebyshev_N_k2": 1328306.359168242,
+      "chebyshev_N_kn": 2181547308072679.8,
+      "chebyshev_N_u1_half": 26863152969876.83,
+      "exact_q_verify_ms": 0.083
+    },
+    {
+      "n": 30,
+      "chebyshev_N_k2": 3241862.336504162,
+      "chebyshev_N_kn": 8.993095366842329e+18,
+      "chebyshev_N_u1_half": 8.993633562274202e+16,
+      "exact_q_verify_ms": 0.062
+    },
+    {
+      "n": 40,
+      "chebyshev_N_k2": 10243282.31426693,
+      "chebyshev_N_kn": 9.49025091136388e+24,
+      "chebyshev_N_u1_half": 7.2253833094165376e+22,
+      "exact_q_verify_ms": 0.062
+    }
+  ]
+}

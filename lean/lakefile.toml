@@ -1,0 +1,6 @@
+name = "LieTrainability"
+version = "1.0.0"
+defaultTargets = ["LieTrainability"]
+
+[[lean_lib]]
+name = "LieTrainability"
